@@ -1,0 +1,192 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[ngerman]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{circuits.ee.IEC, positioning}
+
+\geometry{margin=2.5cm}
+
+\title{Wissenschaftliche Dokumentation \\[4mm]
+       \Large Bestimmung der Ersatzparameter eines Dreileiterkabels mittels COMSOL}
+\author{Studiengang Elektrotechnik \\ Modul: Angewandter Elektromagnetismus}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Einleitung}
+
+In dieser Dokumentation wird ein dreipoliges, abgeschirmtes Kabel elektromagnetisch 
+untersucht. Ziel ist die Bestimmung der elektrischen Ersatzparameter für ein 
+Pi-Ersatzschaltbild. Alle Simulationen werden in COMSOL Multiphysics durchgeführt.  
+Die Aufgabenstellung folgt den Vorgaben aus der Simulationseinheit 
+(Prof.~Dr. Smajic, OST).  
+
+Die folgenden Parameter sind vorgegeben:
+\begin{itemize}
+    \item Abschirmung: äußerer Radius $r_a = \SI{5}{mm}$, innerer Radius $r_i = \SI{4.5}{mm}$
+    \item Leiter: Radius $r_l = \SI{1}{mm}$, elektrisch leitfähig
+    \item Isolierstoff: relative Permittivität $\varepsilon_r = 4$
+    \item Leiterpositionen: $r_1 = \SI{2.5}{mm}$, $r_2 = \SI{2.3}{mm}$, $r_3 = \SI{2.1}{mm}$,
+    Winkel $\varphi_{12} = 55^\circ$, $\varphi_{23} = 61^\circ$
+    \item Modelllänge: $L = \SI{1}{m}$
+\end{itemize}
+
+---
+
+\section{Geometriemodell}
+
+Das Kabel wird als 2D-Querschnitt modelliert. Die drei Leiter werden gemäß den 
+vorgegebenen Abständen und Winkeln im Inneren der kreisförmigen Abschirmung platziert.  
+Der isotrope Isolierstoff füllt den Zwischenraum vollständig aus.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/geometry.png}
+    \caption{2D-Querschnittsmodell des Dreileiterkabels in COMSOL.}
+\end{figure}
+
+---
+
+\section{Aufgabe 1: Mesh-Studie}
+
+Ziel der Netzstudie ist die Überprüfung der numerischen Konvergenz.  
+Für jedes Netzlevel wird die magnetische Energie
+\[
+    W_\mathrm{mag} = \frac{1}{2} \int \mathbf{B} \cdot \mathbf{H} \, dV
+\]
+berechnet.
+
+Ein konvergentes Ergebnis liegt vor, wenn Änderungen von $W_\mathrm{mag}$ zwischen 
+zwei Verfeinerungsstufen kleiner als 1 \% sind.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/meshgraph.png}
+    \caption{Netzstudie: Beispielnetz und Konvergenzkurve der magnetischen Energie.}
+    \label{fig:mesh_study}
+\end{figure}
+
+---
+
+\section{Aufgabe 2: Magneto-quasistatische Simulation}
+
+Die Eigen- und gegenseitigen Induktivitäten der drei Leiter werden bei 
+$f = \SI{50}{Hz}$ bestimmt. Die elektrische Isolation wird als verlustfrei angenommen, 
+die Leiter besitzen jedoch einen ohmschen Widerstand.
+
+\subsection{Theoretische Grundlagen}
+
+Für den Strom in Leiter $i$ ergibt sich die magnetische Energie zu
+\[
+    W_\mathrm{mag} = \frac{1}{2} \sum_{i=1}^{3} \sum_{j=1}^{3}
+    L_{ij} I_i I_j ,
+\]
+mit
+\[
+    L_{ii} = \text{Eigeninduktivität}, \qquad  
+    L_{ij} = \text{gegenseitige Induktivität}.
+\]
+
+Aus der Simulation wird das magnetische Vektorpotential $\mathbf{A}$ berechnet.  
+Die Induktivität ergibt sich aus
+\[
+    L_{ij} = \frac{1}{I_j^2} \int \mathbf{A}_i \cdot \mathbf{J}_j \, dV .
+\]
+
+Der Leiterwiderstand ergibt sich über
+\[
+    R = \rho \frac{L}{A},
+\]
+mit $\rho$: spezifischer Widerstand des Leitermaterials.
+
+Hier Ergebnisse einfügen:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c}
+\textbf{Parameter} & \textbf{Wert} \\
+\hline
+$L_{11}$ & ... \\
+$L_{12}$ & ... \\
+$L_{13}$ & ... \\
+$R_1$ & ... \\
+\end{tabular}
+\caption{Induktivitäten und ohmsche Widerstände.}
+\end{table}
+
+---
+
+\section{Aufgabe 3: Elektrostatische Simulation – Kapazitäten}
+
+Die kapazitiven Kopplungen ergeben sich aus der Lösung des elektrostatischen 
+Problems. Die fundamentale Gleichung lautet:
+\[
+    \nabla \cdot (\varepsilon \nabla \phi) = 0.
+\]
+
+Die Ladung eines Leiters ergibt sich aus
+\[
+    Q_i = \int \mathbf{D}\cdot \mathbf{n}\, dA .
+\]
+
+Die Kapazitätsmatrix folgt aus
+\[
+    C_{ij} = \frac{Q_i}{V_j}.
+\]
+
+Hier Grafiken und Kapazitätsmatrix einfügen:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c}
+\textbf{Kapazität} & \textbf{Wert} \\
+\hline
+$C_{11}$ & ... \\
+$C_{12}$ & ... \\
+$C_{13}$ & ... \\
+$C_{1\text{Schirm}}$ & ... \\
+\end{tabular}
+\caption{Kapazitive Kopplungen der Leiter und gegen die Abschirmung.}
+\end{table}
+
+---
+
+\section{Aufgabe 4: Pi-Ersatzschaltbild}
+
+Aus allen vorher bestimmten Parametern wird das äquivalente Pi-Ersatzmodell der 
+Dreileiterleitung aufgebaut:
+
+\begin{itemize}
+    \item Serienparameter: $R_i$, $L_{ii}$ und induktive Kopplungen $L_{ij}$
+    \item Shuntparameter: Kapazitäten $C_{ij}$ und $C_{i\text{Schirm}}$
+\end{itemize}
+
+Diagramm hier einfügen:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/pi_ersatzbild.drawio.png} 
+    \caption{Pi-Ersatzschaltbild der Leitung.}
+\end{figure}
+
+---
+
+\section{Fazit}
+
+In dieser Arbeit wurden alle relevanten elektromagnetischen Parameter eines 
+dreipoligen Kabels durch Simulation bestimmt. Die ermittelten Größen ermöglichen 
+die vollständige Beschreibung des dynamischen Verhaltens der Leitung und bilden 
+die Grundlage für die Weiterverwendung im Gesamtsystemmodell.
+
+\end{document}
