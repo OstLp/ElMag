@@ -145,22 +145,30 @@ Die Kapazitätsmatrix folgt aus
     C_{ij} = \frac{Q_i}{V_j}.
 \]
 
-Hier Grafiken und Kapazitätsmatrix einfügen:
+In COMSOL wurden die Potentialfälle jeweils so definiert, dass ein Leiter auf
+\SI{1}{V} gesetzt wird, während alle anderen Leiter sowie die Abschirmung
+auf \SI{0}{V} liegen. Aus den resultierenden Ladungen ergibt sich die folgende
+Maxwell-Kapazitätsmatrix:
 
 \begin{table}[H]
 \centering
-\begin{tabular}{c|c}
-\textbf{Kapazität} & \textbf{Wert} \\
+\caption{Maxwell-Kapazitätsmatrix des Dreileiterkabels (in \si{pF}).}
+\begin{tabular}{c|cccc}
+ & Leiter 1 & Leiter 2 & Leiter 3 & Schirm \\
 \hline
-$C_{11}$ & ... \\
-$C_{12}$ & ... \\
-$C_{13}$ & ... \\
-$C_{1\text{Schirm}}$ & ... \\
+Leiter 1 & 86.875 & -46.347 & -3.1250 & -37.403 \\
+Leiter 2 & -46.347 & 115.99 & -44.687 & -24.952 \\
+Leiter 3 & -3.1250 & -44.687 & 79.474 & -31.663 \\
+Schirm   & -37.403 & -24.952 & -31.663 & 94.017 \\
 \end{tabular}
-\caption{Kapazitive Kopplungen der Leiter und gegen die Abschirmung.}
 \end{table}
 
----
+Die Diagonalelemente $C_{ii}$ beschreiben die Eigenkapazitäten der Leiter unter
+Berücksichtigung der Abschirmung und der gegenseitigen Kopplungen,
+während die Nebendiagonalelemente $C_{ij}$ (mit $i \neq j$) die kapazitive Kopplung
+zwischen den Leitern darstellen. Die letzte Zeile und Spalte geben die Kopplung
+zum Schirm wieder.
+
 
 \section{Aufgabe 4: Pi-Ersatzschaltbild}
 
