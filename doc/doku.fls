@@ -1,8 +1,8 @@
-PWD /Users/gianmarconaf/Documents/Gian_Marco/Studium/semester5/Elmag/testat/doc
+PWD /Users/gianmarconaf/Documents/Gian_Marco/Studium/semester5/Elmag/testat/doku/ElMag/doc
 INPUT /usr/local/texlive/2024/texmf.cnf
 INPUT /usr/local/texlive/2024/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt
-INPUT /Users/gianmarconaf/Documents/Gian_Marco/Studium/semester5/Elmag/testat/doc/doku.tex
+INPUT /Users/gianmarconaf/Documents/Gian_Marco/Studium/semester5/Elmag/testat/doku/ElMag/doc/doku.tex
 OUTPUT doku.log
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/base/article.cls
 INPUT /usr/local/texlive/2024/texmf-dist/tex/latex/base/article.cls
@@ -282,6 +282,11 @@ INPUT ./images/meshgraph.png
 INPUT ./images/meshgraph.png
 INPUT ./images/meshgraph.png
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT ./images/magnetic_flux_density.png
+INPUT ./images/magnetic_flux_density.png
+INPUT ./images/magnetic_flux_density.png
+INPUT ./images/magnetic_flux_density.png
+INPUT ./images/magnetic_flux_density.png
 INPUT ./images/pi_ersatzbild.drawio.png
 INPUT ./images/pi_ersatzbild.drawio.png
 INPUT ./images/pi_ersatzbild.drawio.png

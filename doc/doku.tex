@@ -110,21 +110,25 @@ Der Leiterwiderstand ergibt sich über
 \]
 mit $\rho$: spezifischer Widerstand des Leitermaterials.
 
-Hier Ergebnisse einfügen:
-
 \begin{table}[H]
 \centering
 \begin{tabular}{c|c}
 \textbf{Parameter} & \textbf{Wert} \\
 \hline
-$L_{11}$ & ... \\
-$L_{12}$ & ... \\
-$L_{13}$ & ... \\
-$R_1$ & ... \\
+$L_{11}$ & $3.0933e-7$ \\
+$L_{12}$ & $3.1359e-7$ \\
+$L_{13}$ & $3.2381e-7$ \\
+$R_1$ & $6.7021e-5$ \\
 \end{tabular}
 \caption{Induktivitäten und ohmsche Widerstände.}
 \end{table}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/magnetic_flux_density.png}
+    \caption{Magnetische Flussdichte und Stromverteilung der Leiter bei $f=\SI{50}{Hz}$.}
+    \label{fig:magnetic_flux_density}
+\end{figure}
 ---
 
 \section{Aufgabe 3: Elektrostatische Simulation – Kapazitäten}
@@ -171,8 +175,6 @@ Dreileiterleitung aufgebaut:
     \item Serienparameter: $R_i$, $L_{ii}$ und induktive Kopplungen $L_{ij}$
     \item Shuntparameter: Kapazitäten $C_{ij}$ und $C_{i\text{Schirm}}$
 \end{itemize}
-
-Diagramm hier einfügen:
 
 \begin{figure}[H]
     \centering
