@@ -8,13 +8,17 @@
 \usepackage{geometry}
 \usepackage{float}
 \usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{csquotes}
+
 \usetikzlibrary{circuits.ee.IEC, positioning}
 
 \geometry{margin=2.5cm}
 
 \title{Wissenschaftliche Dokumentation \\[4mm]
        \Large Bestimmung der Ersatzparameter eines Dreileiterkabels mittels COMSOL}
-\author{Studiengang Elektrotechnik \\ Modul: Angewandter \\ Verfasser: Laurens Perseus, Gian Marco Näf}
+\author{Laurens Perseus, Gian Marco Näf \\ Studiengang Elektrotechnik \\ Modul: Angewandter Elektromagnetismus}
 \date{\today}
 
 \begin{document}
@@ -24,171 +28,268 @@
 \tableofcontents
 \newpage
 
-\section{Einleitung}
+% ------------------------------------------------------------
+\section*{Aufgabenstellung}
+% ------------------------------------------------------------
 
-In dieser Dokumentation wird ein dreipoliges, abgeschirmtes Kabel elektromagnetisch 
-untersucht. Ziel ist die Bestimmung der elektrischen Ersatzparameter für ein 
-Pi-Ersatzschaltbild. Alle Simulationen werden in COMSOL Multiphysics durchgeführt.  
-Die Aufgabenstellung folgt den Vorgaben aus der Simulationseinheit 
-(Prof.~Dr. Smajic, OST).  
+Die Aufgabenstellung basiert auf dem offiziellen Aufgabenblatt des Moduls
+Angewandter Elektromagnetismus (Prof.~Dr.~Smajic, OST). Gefordert sind:
 
-Die folgenden Parameter sind vorgegeben:
 \begin{itemize}
-    \item Abschirmung: äußerer Radius $r_a = \SI{5}{mm}$, innerer Radius $r_i = \SI{4.5}{mm}$
-    \item Leiter: Radius $r_l = \SI{1}{mm}$, elektrisch leitfähig
-    \item Isolierstoff: relative Permittivität $\varepsilon_r = 4$
-    \item Leiterpositionen: $r_1 = \SI{2.5}{mm}$, $r_2 = \SI{2.3}{mm}$, $r_3 = \SI{2.1}{mm}$,
-    Winkel $\varphi_{12} = 55^\circ$, $\varphi_{23} = 61^\circ$
-    \item Modelllänge: $L = \SI{1}{m}$
+    \item Durchführung einer Mesh-Studie und Bewertung der Konvergenz.
+    \item Berechnung der Eigen- und Gegeninduktivitäten sowie der ohmschen Widerstände.
+    \item Elektrostatische Simulation zur Bestimmung der Kapazitätsmatrix.
+    \item Aufbau des Pi-Ersatzschaltbilds.
 \end{itemize}
 
----
+\newpage
 
+% ------------------------------------------------------------
+\section{Einleitung}
+% ------------------------------------------------------------
+
+Die elektromagnetische Charakterisierung eines mehradrigen Kabels erfordert die
+Bestimmung von Induktivitäten, Widerständen und Kapazitäten über geeignete
+Maxwell-basierte Modelle. Die theoretischen Grundlagen folgen der klassischen
+Elektrodynamik nach Jackson \cite{jackson_classical}, Griffiths
+\cite{griffiths_em} und Sadiku \cite{sadiku_fields}. 
+
+Alle numerischen Berechnungen werden in COMSOL Multiphysics durchgeführt,
+entsprechend den Dokumentationen in \cite{comsol_reference}.
+
+Modellparameter:
+
+\begin{itemize}
+    \item Abschirmung: $r_a = \SI{5}{mm}$, $r_i = \SI{4.5}{mm}$
+    \item Leiter: Radius $r_l = \SI{1}{mm}$
+    \item Dielektrikum: relative Permittivität $\varepsilon_r = 4$
+    \item Leiterpositionen: $r_1=2.5$ mm, $r_2=2.3$ mm, $r_3=2.1$ mm
+\end{itemize}
+
+\newpage
+
+% ------------------------------------------------------------
 \section{Geometriemodell}
+% ------------------------------------------------------------
 
-Das Kabel wird als 2D-Querschnitt modelliert. Die drei Leiter werden gemäß den 
-vorgegebenen Abständen und Winkeln im Inneren der kreisförmigen Abschirmung platziert.  
-Der isotrope Isolierstoff füllt den Zwischenraum vollständig aus.
+Das Modell wurde als 2D-Querschnitt aufgebaut. Der Innenraum ist vollständig mit einem
+homogenen Dielektrikum gefüllt. Eine äußere Luftdomäne wurde hinzugefügt, um die
+Feldabnahme korrekt abzubilden. Gemäß \cite{comsol_reference} wird empfohlen,
+die Luftdomäne auf mindestens das Fünffache des Außenradius zu setzen.
+
+Zusätzlich wurde die maximale Elementskalierung (\textit{maximum element size})
+auf den dimensionslosen Wert \textit{0.2} festgelegt, um eine ausreichende
+Feldauflösung an den Leitern zu gewährleisten.
+
+Der Radius der äußeren Luftdomäne wurde auf \SI{0.01}{m} gesetzt – ein optimaler
+Kompromiss aus Genauigkeit und Rechenzeit.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{images/geometry.png}
-    \caption{2D-Querschnittsmodell des Dreileiterkabels in COMSOL.}
+    \caption{Geometrie des Dreileiterkabels.}
 \end{figure}
 
----
+\newpage
 
+% ------------------------------------------------------------
 \section{Aufgabe 1: Mesh-Studie}
+% ------------------------------------------------------------
 
-Ziel der Netzstudie ist die Überprüfung der numerischen Konvergenz.  
-Für jedes Netzlevel wird die magnetische Energie
+Die magnetische Energie dient als Konvergenzkriterium:
+
 \[
-    W_\mathrm{mag} = \frac{1}{2} \int \mathbf{B} \cdot \mathbf{H} \, dV
+W_\mathrm{mag} = \frac{1}{2} \int \mathbf{B} \cdot \mathbf{H}\, dV
 \]
-berechnet.
+wie definiert in \cite{jackson_classical}.  
 
-Ein konvergentes Ergebnis liegt vor, wenn Änderungen von $W_\mathrm{mag}$ zwischen 
-zwei Verfeinerungsstufen kleiner als 1 \% sind.
+Das finale Netz ist in Abbildung \ref{fig_mesh_final} dargestellt.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/meshgraph.png}
-    \caption{Netzstudie: Beispielnetz und Konvergenzkurve der magnetischen Energie.}
-    \label{fig:mesh_study}
+    \includegraphics[width=0.65\textwidth]{images/final_mesh.png}
+    \caption{Finales Netz nach Konvergenzstudie.}
+    \label{fig_mesh_final}
 \end{figure}
 
----
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/meshgraph.png}
+    \caption{Konvergenzverlauf der magnetischen Energie.}
+\end{figure}
 
+\newpage
+
+% ------------------------------------------------------------
 \section{Aufgabe 2: Magneto-quasistatische Simulation}
+% ------------------------------------------------------------
 
-Die Eigen- und gegenseitigen Induktivitäten der drei Leiter werden bei 
-$f = \SI{50}{Hz}$ bestimmt. Die elektrische Isolation wird als verlustfrei angenommen, 
-die Leiter besitzen jedoch einen ohmschen Widerstand.
+Die Induktivität zweier Leiter ergibt sich aus dem magnetischen Vektorpotential
+\cite{sadiku_fields}:
 
-\subsection{Theoretische Grundlagen}
-
-Für den Strom in Leiter $i$ ergibt sich die magnetische Energie zu
 \[
-    W_\mathrm{mag} = \frac{1}{2} \sum_{i=1}^{3} \sum_{j=1}^{3}
-    L_{ij} I_i I_j ,
-\]
-mit
-\[
-    L_{ii} = \text{Eigeninduktivität}, \qquad  
-    L_{ij} = \text{gegenseitige Induktivität}.
+L_{ij} = \frac{1}{I_j^2}\int \mathbf{A}_i \cdot \mathbf{J}_j\, dV .
 \]
 
-Aus der Simulation wird das magnetische Vektorpotential $\mathbf{A}$ berechnet.  
-Die Induktivität ergibt sich aus
+Die Leitungswiderstände ergeben sich über das Materialgesetz:
+
 \[
-    L_{ij} = \frac{1}{I_j^2} \int \mathbf{A}_i \cdot \mathbf{J}_j \, dV .
+R = \rho \frac{L}{A},
 \]
 
-Der Leiterwiderstand ergibt sich über
-\[
-    R = \rho \frac{L}{A},
-\]
-mit $\rho$: spezifischer Widerstand des Leitermaterials.
+siehe \cite{griffiths_em}.
+
+\subsection*{Ermittelte Induktivitäten und Widerstände}
+
+Die aus COMSOL extrahierten Werte lauten:
 
 \begin{table}[H]
 \centering
+\caption{Ermittelte Induktivitäten und Widerstände.}
 \begin{tabular}{c|c}
-\textbf{Parameter} & \textbf{Wert} \\
-\hline
-$L_{11}$ & $3.0933e-7$ \\
-$L_{12}$ & $3.1359e-7$ \\
-$L_{13}$ & $3.2381e-7$ \\
-$R_1$ & $6.7021e-5$ \\
+\toprule
+Parameter & Wert \\
+\midrule
+$L_{11}$ & $3.0933 \times 10^{-7}\,\mathrm{H}$ \\
+$L_{12}$ & $3.1359 \times 10^{-7}\,\mathrm{H}$ \\
+$L_{13}$ & $3.2381 \times 10^{-7}\,\mathrm{H}$ \\
+$R_1$    & $6.7021 \times 10^{-5}\,\Omega$ \\
+\bottomrule
 \end{tabular}
-\caption{Induktivitäten und ohmsche Widerstände.}
 \end{table}
+
+Aus Symmetriegründen gilt:
+
+\[
+L_{12}=L_{21}, \qquad L_{13}=L_{31}.
+\]
+
+Weitere Einträge der Matrix ergeben sich analog durch Bestromung der anderen Leiter.
+
+\subsection*{Magnetische Flussdichte}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/magnetic_flux_density.png}
-    \caption{Magnetische Flussdichte und Stromverteilung der Leiter bei $f=\SI{50}{Hz}$.}
-    \label{fig:magnetic_flux_density}
+    \includegraphics[width=0.65\textwidth]{images/magnetic_flux_density.png}
+    \caption{Magnetische Flussdichte $|\mathbf{B}|$ für den Gesamtfall.}
 \end{figure}
----
 
-\section{Aufgabe 3: Elektrostatische Simulation – Kapazitäten}
+\subsection*{Magnetische Flussdichte – alle Einzelfälle}
 
-Die kapazitiven Kopplungen ergeben sich aus der Lösung des elektrostatischen 
-Problems. Die fundamentale Gleichung lautet:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.32\textwidth]{images/B_case1.png}
+    \includegraphics[width=0.32\textwidth]{images/B_case2.png}
+    \includegraphics[width=0.32\textwidth]{images/B_case3.png}
+    \caption{B-Feld $|\mathbf{B}|$ für Bestromung von Leiter 1, 2 und 3.}
+\end{figure}
+
+\subsection*{Stromdichte – alle Einzelfälle}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.32\textwidth]{images/J_case1.png}
+    \includegraphics[width=0.32\textwidth]{images/J_case2.png}
+    \includegraphics[width=0.32\textwidth]{images/J_case3.png}
+    \caption{Stromdichte $|\mathbf{J}|$ für Bestromung der drei Leiter.}
+\end{figure}
+
+\newpage
+
+% ------------------------------------------------------------
+\section{Aufgabe 3: Elektrostatische Simulation}
+% ------------------------------------------------------------
+
+Die elektrostatische Grundgleichung lautet \cite{griffiths_em}:
+
 \[
-    \nabla \cdot (\varepsilon \nabla \phi) = 0.
+\nabla \cdot (\varepsilon \nabla \phi) = 0.
 \]
 
-Die Ladung eines Leiters ergibt sich aus
+Die Ladung eines Leiters ergibt sich zu:
+
 \[
-    Q_i = \int \mathbf{D}\cdot \mathbf{n}\, dA .
+Q_i = \int \mathbf{D}\cdot \mathbf{n}\, dA,
 \]
 
-Die Kapazitätsmatrix folgt aus
+woraus die Kapazitätsmatrix folgt:
+
 \[
-    C_{ij} = \frac{Q_i}{V_j}.
+C_{ij} = \frac{Q_i}{V_j}.
 \]
 
-Hier Grafiken und Kapazitätsmatrix einfügen:
+\subsection*{Potentialfeld}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/electric_potential.png}
+    \caption{Elektrisches Potentialfeld bei $V_1=1$\,V.}
+\end{figure}
+
+\subsection*{Elektrische Feldstärke}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/electric_field.png}
+    \caption{Elektrische Feldstärke $|\mathbf{E}|$.}
+\end{figure}
 
 \begin{table}[H]
 \centering
-\begin{tabular}{c|c}
-\textbf{Kapazität} & \textbf{Wert} \\
+\caption{Kapazitätsmatrix des Dreileiterkabels (in pF).}
+\begin{tabular}{c|cccc}
+ & Leiter 1 & Leiter 2 & Leiter 3 & Schirm \\
 \hline
-$C_{11}$ & ... \\
-$C_{12}$ & ... \\
-$C_{13}$ & ... \\
-$C_{1\text{Schirm}}$ & ... \\
+Leiter 1 & 86.875 & -46.347 & -3.1250 & -37.403 \\
+Leiter 2 & -46.347 & 115.99 & -44.687 & -24.952 \\
+Leiter 3 & -3.1250 & -44.687 & 79.474 & -31.663 \\
+Schirm   & -37.403 & -24.952 & -31.663 & 94.017 \\
 \end{tabular}
-\caption{Kapazitive Kopplungen der Leiter und gegen die Abschirmung.}
 \end{table}
 
----
+\newpage
 
+% ------------------------------------------------------------
 \section{Aufgabe 4: Pi-Ersatzschaltbild}
-
-Aus allen vorher bestimmten Parametern wird das äquivalente Pi-Ersatzmodell der 
-Dreileiterleitung aufgebaut:
-
-\begin{itemize}
-    \item Serienparameter: $R_i$, $L_{ii}$ und induktive Kopplungen $L_{ij}$
-    \item Shuntparameter: Kapazitäten $C_{ij}$ und $C_{i\text{Schirm}}$
-\end{itemize}
+% ------------------------------------------------------------
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/pi_ersatzbild.drawio.png} 
-    \caption{Pi-Ersatzschaltbild der Leitung.}
+    \includegraphics[width=0.8\textwidth]{images/pi_ersatzbild.drawio.png}
+    \caption{Pi-Ersatzschaltbild des Dreileiterkabels.}
 \end{figure}
 
----
+\newpage
 
+% ------------------------------------------------------------
 \section{Fazit}
+% ------------------------------------------------------------
 
-In dieser Arbeit wurden alle relevanten elektromagnetischen Parameter eines 
-dreipoligen Kabels durch Simulation bestimmt. Die ermittelten Größen ermöglichen 
-die vollständige Beschreibung des dynamischen Verhaltens der Leitung und bilden 
-die Grundlage für die Weiterverwendung im Gesamtsystemmodell.
+Alle relevanten Ersatzparameter des Kabels wurden erfolgreich bestimmt.
+Die Simulationsergebnisse zeigen die magnetischen Kopplungen zwischen den Leitern klar auf.
+Durch die vollständige Bestimmung der Induktivitäts-, Kapazitäts- und Widerstandsparameter
+kann das Kabel realitätsnah in Gesamtsystemsimulationen eingebettet werden.
+
+\newpage
+
+% ------------------------------------------------------------
+\section*{Eidesstattliche Erklärung}
+% ------------------------------------------------------------
+
+Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und ohne unerlaubte 
+Hilfen erstellt haben. Alle verwendeten Quellen sind vollständig angegeben. Die Arbeit 
+wurde zuvor nicht eingereicht.
+
+\vspace{2cm}
+
+Ort, Datum: \hrulefill
+
+\vspace{1.5cm}
+
+Unterschriften: \hrulefill
+
+\newpage
+\bibliographystyle{IEEEtran}
+\bibliography{references}
 
 \end{document}
