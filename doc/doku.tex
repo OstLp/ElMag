@@ -11,6 +11,9 @@
 \usepackage{booktabs}
 \usepackage{hyperref}
 \usepackage{csquotes}
+\usepackage{pdfpages}
+\usepackage{subcaption}
+
 
 \usetikzlibrary{circuits.ee.IEC, positioning}
 
@@ -32,15 +35,10 @@
 \section*{Aufgabenstellung}
 % ------------------------------------------------------------
 
-Die Aufgabenstellung basiert auf dem offiziellen Aufgabenblatt des Moduls
-Angewandter Elektromagnetismus (Prof.~Dr.~Smajic, OST). Gefordert sind:
 
-\begin{itemize}
-    \item Durchführung einer Mesh-Studie und Bewertung der Konvergenz.
-    \item Berechnung der Eigen- und Gegeninduktivitäten sowie der ohmschen Widerstände.
-    \item Elektrostatische Simulation zur Bestimmung der Kapazitätsmatrix.
-    \item Aufbau des Pi-Ersatzschaltbilds.
-\end{itemize}
+
+\includepdf[pages={1}]{images/Aufgabenstellung.pdf}
+
 
 \newpage
 
@@ -91,19 +89,45 @@ Kompromiss aus Genauigkeit und Rechenzeit.
 \end{figure}
 
 \newpage
+% ------------------------------------------------------------
+% Parametervariation der magnetischen Energie
+% ------------------------------------------------------------
+\section{Parametervariation der magnetischen Energie}
 
+Zur Untersuchung des Einflusses der geometrischen Ausdehnung des Luftbereichs auf das magnetische Verhalten des Systems wurde eine parametische Studie durchgeführt. Dabei wurde der Luftradius $r_\mathrm{air}$ schrittweise von \SI{0.1}{\meter} bis \SI{2}{\meter} in Schritten von \SI{0.05}{\meter} variiert. Für jeden Parameterwert wurde eine magneto-quasistatische Simulation durchgeführt.
+
+Als Auswertegröße dient die im Modell gespeicherte magnetische Energie $W_\mathrm{m}$, welche aus der magnetischen Energiedichte über das gesamte Rechengebiet integriert wurde. Diese Größe ist direkt mit der effektiven Induktivität des Systems verknüpft und eignet sich daher zur Beurteilung der Konvergenz sowie des Einflusses der äußeren Modellgrenzen.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/magnetic_flux_density_r_l.png}
+    \caption{Magnetische Energie $W_\mathrm{m}$ in Abhängigkeit vom Luftradius $r_\mathrm{air}$ aus einer parametischen Studie.}
+    \label{fig:magnetic_energy_radius}
+\end{figure}
+
+Abbildung~\ref{fig:magnetic_energy_radius} zeigt den Verlauf der magnetischen Energie in Abhängigkeit vom Luftradius. Mit zunehmendem Radius vergrößert sich das feldführende Volumen, wodurch sich die magnetische Energie zunächst deutlich ändert. Ab einem bestimmten Radius geht der Kurvenverlauf in ein nahezu konstantes Plateau über. 
+
+Dieses Verhalten zeigt, dass der Einfluss der äußeren Randbedingungen auf das magnetische Feld ab diesem Punkt vernachlässigbar ist. Der gewählte Luftradius kann somit als ausreichend groß betrachtet werden, um Randartefakte zu vermeiden. Gleichzeitig stellt dieser Radius einen sinnvollen Kompromiss zwischen numerischer Genauigkeit und Rechenaufwand dar.
+
+\newpage
 % ------------------------------------------------------------
 \section{Aufgabe 1: Mesh-Studie}
 % ------------------------------------------------------------
 
-Die magnetische Energie dient als Konvergenzkriterium:
+Zur Überprüfung der Netzkonvergenz wird die magnetische Energie $W_\mathrm{mag}$ betrachtet. Diese beschreibt die im Magnetfeld gespeicherte Energie und wird aus der magnetischen Flussdichte $\mathbf{B}$ und der magnetischen Feldstärke $\mathbf{H}$ über das gesamte Rechengebiet berechnet. Da diese Größe vom resultierenden Magnetfeld abhängt, eignet sie sich gut, um den Einfluss der Netzverfeinerung zu beurteilen.
+
+Im Rahmen der Konvergenzstudie wurde das Netz schrittweise verfeinert. Für jede Netzstufe wurde eine magneto-quasistatische Simulation durchgeführt und anschließend die magnetische Energie ausgewertet. Durch den Vergleich der Ergebnisse kann festgestellt werden, wie stark sich die Lösung bei einer weiteren Verfeinerung des Netzes noch ändert.
+
+Der in der Abbildung dargestellte Verlauf zeigt, dass sich die magnetische Energie mit zunehmender Netzfeinheit stabilisiert. Ab einer bestimmten Netzauflösung sind die Änderungen nur noch gering. Dies deutet darauf hin, dass das Ergebnis nicht mehr wesentlich vom Netz abhängt.
+
+Das in Abbildung~\ref{fig_mesh_final} gezeigte Netz wurde daher als finales Netz gewählt. Es bietet eine ausreichende Genauigkeit bei gleichzeitig vertretbarem Rechenaufwand und wird für alle weiteren Simulationen verwendet.
+
 
 \[
 W_\mathrm{mag} = \frac{1}{2} \int \mathbf{B} \cdot \mathbf{H}\, dV
 \]
 wie definiert in \cite{jackson_classical}.  
 
-Das finale Netz ist in Abbildung \ref{fig_mesh_final} dargestellt.
 
 \begin{figure}[H]
     \centering
@@ -123,6 +147,7 @@ Das finale Netz ist in Abbildung \ref{fig_mesh_final} dargestellt.
 % ------------------------------------------------------------
 \section{Aufgabe 2: Magneto-quasistatische Simulation}
 % ------------------------------------------------------------
+Die Induktivitäten der Leiter werden über das magnetische Vektorpotential bestimmt. Dabei beschreibt $L_{ij}$ die Selbst- bzw. Gegeninduktivität zwischen Leiter $i$ und Leiter $j$. Das magnetische Vektorpotential $\mathbf{A}_i$ wird durch den Strom im Leiter $i$ erzeugt, während $\mathbf{J}_j$ die Stromdichte im Leiter $j$ darstellt. Durch die Integration über das gesamte Volumen wird die magnetische Kopplung der beiden Leiter erfasst. Die Normierung mit dem Quadrat des Stroms stellt sicher, dass die Induktivität unabhängig von der gewählten Stromstärke ist.
 
 Die Induktivität zweier Leiter ergibt sich aus dem magnetischen Vektorpotential
 \cite{sadiku_fields}:
@@ -138,6 +163,8 @@ R = \rho \frac{L}{A},
 \]
 
 siehe \cite{griffiths_em}.
+
+Die elektrischen Widerstände der Leiter werden aus dem Materialgesetz berechnet. Der Widerstand $R$ hängt dabei vom spezifischen elektrischen Widerstand des Materials $\rho$, der Leiterlänge $L$ sowie der Querschnittsfläche $A$ ab. Ein längerer Leiter oder ein Material mit höherem spezifischem Widerstand führt zu einem größeren Widerstand, während ein größerer Leiterquerschnitt den Widerstand reduziert.
 
 \subsection*{Ermittelte Induktivitäten und Widerstände}
 
@@ -178,27 +205,63 @@ Weitere Einträge der Matrix ergeben sich analog durch Bestromung der anderen Le
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.32\textwidth]{images/B_case1.png}
-    \includegraphics[width=0.32\textwidth]{images/B_case2.png}
-    \includegraphics[width=0.32\textwidth]{images/B_case3.png}
-    \caption{B-Feld $|\mathbf{B}|$ für Bestromung von Leiter 1, 2 und 3.}
+
+    % --- Erste Zeile: B-Feld ---
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/B_case1.png}
+        \caption{Leiter 1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/B_case2.png}
+        \caption{Leiter 2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/B_case3.png}
+        \caption{Leiter 3}
+    \end{subfigure}
+
+    \vspace{4mm}
+
+    % --- Zweite Zeile: Stromdichte ---
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/J_case1.png}
+        \caption{Leiter 1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/J_case2.png}
+        \caption{Leiter 2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/J_case3.png}
+        \caption{Leiter 3}
+    \end{subfigure}
+
+    \caption{Magnetische Flussdichte $|\mathbf{B}|$ (oben) und Stromdichte $|\mathbf{J}|$ (unten) für Einzellast der drei Leiter.}
 \end{figure}
 
-\subsection*{Stromdichte – alle Einzelfälle}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.32\textwidth]{images/J_case1.png}
-    \includegraphics[width=0.32\textwidth]{images/J_case2.png}
-    \includegraphics[width=0.32\textwidth]{images/J_case3.png}
-    \caption{Stromdichte $|\mathbf{J}|$ für Bestromung der drei Leiter.}
-\end{figure}
 
 \newpage
 
 % ------------------------------------------------------------
 \section{Aufgabe 3: Elektrostatische Simulation}
 % ------------------------------------------------------------
+
+Die elektrostatische Feldverteilung im Modell wird durch das elektrische Skalarpotential $\phi$ beschrieben. Die Grundgleichung stellt sicher, dass in ladungsfreien Gebieten die Divergenz des elektrischen Flusses verschwindet. Das Materialverhalten geht dabei über die Permittivität $\varepsilon$ in die Gleichung ein und bestimmt die Feldverteilung im Isolationsmaterial.
+
+Aus der berechneten elektrischen Flussdichte $\mathbf{D}$ kann die auf einem Leiter gespeicherte Ladung bestimmt werden. Dazu wird der Normalanteil der Flussdichte über die Oberfläche des jeweiligen Leiters integriert. Diese Ladung hängt von der angelegten elektrischen Spannung ab.
+
+Durch Anlegen einer Spannung $V_j$ an einen Leiter und Berechnung der resultierenden Ladung $Q_i$ an allen Leitern kann die Kapazitätsmatrix bestimmt werden. Die Matrixelemente $C_{ij}$ beschreiben dabei sowohl die Eigenkapazitäten der einzelnen Leiter als auch die kapazitiven Kopplungen zwischen den Leitern.
+
 
 Die elektrostatische Grundgleichung lautet \cite{griffiths_em}:
 
@@ -255,9 +318,41 @@ Schirm   & -37.403 & -24.952 & -31.663 & 94.017 \\
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/pi_ersatzbild.drawio.png}
+    \includegraphics[width=0.8\textwidth]{images/pi_ersatzbild.png}
     \caption{Pi-Ersatzschaltbild des Dreileiterkabels.}
 \end{figure}
+\begin{table}[H]
+\centering
+\caption{Parameter des Pi-Ersatzschaltbilds des Dreileiterkabels.}
+\begin{tabular}{c|c|c}
+\toprule
+Parameter & Beschreibung & Wert \\
+\midrule
+$R_1$ & Widerstand Leiter 1 & $6.70 \times 10^{-5}\,\Omega$ \\
+$R_2$ & Widerstand Leiter 2 & $6.70 \times 10^{-5}\,\Omega$ \\
+$R_3$ & Widerstand Leiter 3 & $6.70 \times 10^{-5}\,\Omega$ \\
+\midrule
+$L_1$ & Eigeninduktivität Leiter 1 & $3.09 \times 10^{-7}\,\mathrm{H}$ \\
+$L_2$ & Eigeninduktivität Leiter 2 & $3.09 \times 10^{-7}\,\mathrm{H}$ \\
+$L_3$ & Eigeninduktivität Leiter 3 & $3.09 \times 10^{-7}\,\mathrm{H}$ \\
+\midrule
+$C_1$ & Kapazität Leiter 1 – Schirm & $37.40\,\mathrm{pF}$ \\
+$C_2$ & Kapazität Leiter 2 – Schirm & $24.95\,\mathrm{pF}$ \\
+$C_3$ & Kapazität Leiter 3 – Schirm & $31.66\,\mathrm{pF}$ \\
+\midrule
+$C_4$ & Kapazität Leiter 1 – Leiter 2 & $46.35\,\mathrm{pF}$ \\
+$C_5$ & Kapazität Leiter 1 – Leiter 3 & $3.13\,\mathrm{pF}$ \\
+$C_6$ & Kapazität Leiter 2 – Leiter 3 & $44.69\,\mathrm{pF}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Die Tabelle fasst alle für das Pi-Ersatzschaltbild relevanten Parameter zusammen.
+Die Widerstände und Induktivitäten beschreiben die Längsparameter der Leiter,
+während die Kapazitäten die Kopplungen der Leiter untereinander sowie gegen den
+Schirm modellieren. Damit ist das Kabel vollständig für zeit- und
+frequenzabhängige Systemsimulationen beschrieben.
+
 
 \newpage
 
